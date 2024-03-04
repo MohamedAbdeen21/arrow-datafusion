@@ -23,7 +23,7 @@ on:
       - main
       - master
     tags:
-      - '*'
+      - 'v*'
   pull_request:
   workflow_dispatch:
 
@@ -35,7 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [x86_64]
+        # ring causes aarch64 builds to fail
+        target: [x86_64, armv7, s390x, ppc64le]
     steps:
       - uses: actions/checkout@v3
       - name: Build wheels
@@ -52,27 +53,25 @@ jobs:
           name: wheels
           path: datafusion-cli/dist
 
-  # Way too slow 
-  #
-  # windows:
-  #   runs-on: windows-latest
-  #   strategy:
-  #     matrix:
-  #       target: [x64]
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - name: Build wheels
-  #       uses: PyO3/maturin-action@v1
-  #       with:
-  #         target: ${{ matrix.target }}
-  #         args: --release --out dist
-  #         working-directory: ./datafusion-cli
-  #         sccache: 'true'
-  #     - name: Upload wheels
-  #       uses: actions/upload-artifact@v3
-  #       with:
-  #         name: wheels
-  #         path: datafusion-cli/dist
+  windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        target: [x64]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build wheels
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist
+          working-directory: ./datafusion-cli
+          sccache: 'true'
+      - name: Upload wheels
+        uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: datafusion-cli/dist
 
   macos:
     runs-on: macos-latest
@@ -113,6 +112,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    if: "startsWith(github.ref, 'refs/tags/')"
     needs: [linux, macos, sdist]
     steps:
       - uses: actions/download-artifact@v3
