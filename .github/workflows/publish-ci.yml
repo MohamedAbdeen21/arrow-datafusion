@@ -42,6 +42,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.target }}
+          working-directory: ./datafusion-cli
           args: --release --out dist
           sccache: 'true'
           manylinux: auto
@@ -63,6 +64,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           args: --release --out dist
+          working-directory: ./datafusion-cli
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -82,6 +84,7 @@ jobs:
         with:
           target: ${{ matrix.target }}
           args: --release --out dist
+          working-directory: ./datafusion-cli
           sccache: 'true'
       - name: Upload wheels
         uses: actions/upload-artifact@v3
@@ -97,6 +100,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: sdist
+          working-directory: ./datafusion-cli
           args: --out dist
       - name: Upload sdist
         uses: actions/upload-artifact@v3
